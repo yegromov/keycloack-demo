@@ -9,6 +9,7 @@
         "php": ">=8.2.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "drenso/symfony-oidc-bundle": "^2.9",
         "symfony/console": "6.2.*",
         "symfony/dotenv": "6.2.*",
         "symfony/flex": "^2",
