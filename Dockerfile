@@ -31,6 +31,10 @@ ENV SYMFONY_VERSION ${SYMFONY_VERSION}
 
 ENV APP_ENV=prod
 
+ENV PHP_MEMORY_LIMIT=2048M
+RUN cd /usr/local/etc/php/conf.d/ && \
+  echo 'memory_limit = 20480M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini
+
 WORKDIR /srv/app
 
 # php extensions installer: https://github.com/mlocati/docker-php-extension-installer
@@ -43,6 +47,7 @@ RUN apk add --no-cache \
 		file \
 		gettext \
 		git \
+		bash \
 	;
 
 RUN set -eux; \
@@ -52,6 +57,10 @@ RUN set -eux; \
     	apcu \
 		opcache \
     ;
+
+# installing symfony-cli
+RUN wget https://get.symfony.com/cli/installer -O - | bash ; \
+	mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 
 ###> recipes ###
 ###< recipes ###
