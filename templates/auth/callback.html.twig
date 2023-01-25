@@ -1,0 +1,12 @@
+<html>
+<head>
+</head>
+<body>
+    <h1>Authorization result</h1>
+    {% if userName is defined %}
+        Username: {{ userName }}
+    {% else %}
+        Not authorized
+    {% endif %}
+</body>
+</html>
