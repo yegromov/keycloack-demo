@@ -48,6 +48,8 @@ RUN apk add --no-cache \
 		gettext \
 		git \
 		bash \
+		wget \
+		curl \
 	;
 
 RUN set -eux; \

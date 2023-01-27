@@ -5,15 +5,88 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends AbstractController
 {
+    #[Route('/', name: 'auth_demo')]
+    #[Template('auth/auth_demo.html.twig')]
+    public function authDemo()
+    {
+        $var = file_get_contents('http://keycloack-test:8085/');
+        return [
+            'var' => $var,
+        ];
+    }
+
     #[Route('/auth', name: 'app_auth')]
     #[Template('auth/index.html.twig')]
-    public function index()
+    public function index(Request $request)
     {
+        // Manual: https://github.com/stevenmaguire/oauth2-keycloak
+
+        $session = $request->getSession();
+
+        $error = 0;
+        $errorMessage = '';
+        $userName = '';
+
+        $provider = new \Stevenmaguire\OAuth2\Client\Provider\Keycloak([
+            'authServerUrl'         => 'http://keycloack-test:8085',
+            'realm'                 => 'scnsoft_realm',
+            'clientId'              => 'scn_client',
+            'clientSecret'          => 'vkUtxVY6QsmxcTDTjkQ6VaRVHC4xOf2G',
+            'redirectUri'           => 'https://localhost/auth',
+        ]);
+
+        if (!isset($_GET['code'])) {
+            // If we don't have an authorization code then get one
+            $authUrl = $provider->getAuthorizationUrl();
+            $session->set('oauth2state', $provider->getState());
+            header('Location: '.$authUrl);
+            exit;
+
+        // Check given state against previously stored one to mitigate CSRF attack
+        } elseif (empty($_GET['state']) || ($_GET['state'] !== $session->get('oauth2state'))) {
+            $session->remove('oauth2state');
+            exit('Invalid state, make sure HTTP sessions are enabled.');
+        } else {
+            // Try to get an access token (using the authorization code grant)
+            try {
+                $token = $provider->getAccessToken('authorization_code', [
+                    'code' => $_GET['code']
+                ]);
+            } catch (Exception $e) {
+                return [
+                    'error' => 1,
+                    'errorMessage' => 'Failed to get access token: '.$e->getMessage(),
+                ];
+            }
+
+            // Optional: Now you have a token you can look up a users profile data
+            try {
+                // We got an access token, let's now get the user's details
+                $user = $provider->getResourceOwner($token);
+
+                // Use these details to create a new profile
+                $userName = $user->getName();
+
+            } catch (Exception $e) {
+                return [
+                    'error' => 1,
+                    'errorMessage' => 'Failed to get resource owner: '.$e->getMessage(),
+                ];
+            }
+
+            // Use this to interact with an API on the users behalf
+            //echo $token->getToken();
+        }
+
         return [
-            'authLink' => 'http://localhost:8085/',
+            'userName' => $userName,
+            'error' => $error,
+            'errorMessage' => $errorMessage,
         ];
     }
 

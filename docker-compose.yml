@@ -16,6 +16,8 @@ services:
       timeout: 3s
       retries: 3
       start_period: 30s
+    extra_hosts:
+      - keycloack-test:host-gateway
     environment:
       # Run "composer require symfony/orm-pack" to install and configure Doctrine ORM
       DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-14}
@@ -53,6 +55,43 @@ services:
         published: ${HTTP3_PORT:-443}
         protocol: udp
 
+  keycloack:
+    image: quay.io/keycloak/keycloak:latest
+    restart: unless-stopped
+#    volumes:
+#      - keycloack_data:/var/run/php
+    ports:
+      - 8085:8080
+      - 8787:8787
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_LOGLEVEL: INFO
+      ROOT_LOGLEVEL: INFO
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloack-postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+      # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+      #JDBC_PARAMS: "ssl=true"
+    command:
+       - start-dev
+       - --hostname=keycloack-test
+    depends_on:
+      - keycloack-postgres
+
+  keycloack-postgres:
+      image: postgres:latest
+      volumes:
+        - keycloak_postgresql:/var/lib/postgresql
+        - keycloak_postgresql_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
@@ -61,5 +100,8 @@ volumes:
   php_socket:
   caddy_data:
   caddy_config:
+  keycloak_postgresql:
+  keycloak_postgresql_data:
+
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
