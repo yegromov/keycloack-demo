@@ -1,8 +1,11 @@
-<html>
-<head>
-</head>
-<body>
-    <a href="https://localhost/auth">Authorize</a>
-    {{ var }}
-</body>
-</html>
+{% extends 'base.html.twig' %}
+
+{% block title %}
+Keycloack Auth Demo Application
+{% endblock %}
+
+{% block body %}
+    <h1>Keycloack Auth Demo Application</h1>
+    <a href="https://localhost/auth" class="btn btn-primary btn-lg">Authorize</a>
+
+{% endblock %}

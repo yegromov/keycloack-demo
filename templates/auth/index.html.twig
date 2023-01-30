@@ -1,11 +1,14 @@
-<html>
-<head>
-</head>
-<body>
+{% extends 'base.html.twig' %}
+
+{% block title %}
+Keycloack Auth Demo Application
+{% endblock %}
+
+{% block body %}
     <h1>Authorization result</h1>
 
-    {% if error is not null and foo is not empty %}
-        Error: {{ userName }}
+    {% if error is not null and error is not empty %}
+        Error: {{ error }} <br>
     {% endif %}
 
     {% if userName is defined %}
@@ -13,5 +16,4 @@
     {% else %}
         Not authorized
     {% endif %}
-</body>
-</html>
+{% endblock %}

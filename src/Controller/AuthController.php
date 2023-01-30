@@ -14,10 +14,6 @@ class AuthController extends AbstractController
     #[Template('auth/auth_demo.html.twig')]
     public function authDemo()
     {
-        $var = file_get_contents('http://keycloack-test:8085/');
-        return [
-            'var' => $var,
-        ];
     }
 
     #[Route('/auth', name: 'app_auth')]
@@ -33,21 +29,22 @@ class AuthController extends AbstractController
         $userName = '';
 
         $provider = new \Stevenmaguire\OAuth2\Client\Provider\Keycloak([
-            'authServerUrl'         => 'http://keycloack-test:8085',
-            'realm'                 => 'scnsoft_realm',
-            'clientId'              => 'scn_client',
-            'clientSecret'          => 'vkUtxVY6QsmxcTDTjkQ6VaRVHC4xOf2G',
-            'redirectUri'           => 'https://localhost/auth',
+            'authServerUrl'         => $this->getParameter('app.oidc.authServerUrl'),
+            'realm'                 => $this->getParameter('app.oidc.realm'),
+            'clientId'              => $this->getParameter('app.oidc.clientId'),
+            'clientSecret'          => $this->getParameter('app.oidc.clientSecret'),
+            'redirectUri'           => $this->getParameter('app.oidc.redirectUri'),
+            'version'               => $this->getParameter('app.oidc.version'),
         ]);
 
         if (!isset($_GET['code'])) {
             // If we don't have an authorization code then get one
             $authUrl = $provider->getAuthorizationUrl();
             $session->set('oauth2state', $provider->getState());
-            header('Location: '.$authUrl);
+            header('Location: ' . $authUrl);
             exit;
 
-        // Check given state against previously stored one to mitigate CSRF attack
+            // Check given state against previously stored one to mitigate CSRF attack
         } elseif (empty($_GET['state']) || ($_GET['state'] !== $session->get('oauth2state'))) {
             $session->remove('oauth2state');
             exit('Invalid state, make sure HTTP sessions are enabled.');
@@ -60,7 +57,7 @@ class AuthController extends AbstractController
             } catch (Exception $e) {
                 return [
                     'error' => 1,
-                    'errorMessage' => 'Failed to get access token: '.$e->getMessage(),
+                    'errorMessage' => 'Failed to get access token: ' . $e->getMessage(),
                 ];
             }
 
@@ -71,11 +68,10 @@ class AuthController extends AbstractController
 
                 // Use these details to create a new profile
                 $userName = $user->getName();
-
             } catch (Exception $e) {
                 return [
                     'error' => 1,
-                    'errorMessage' => 'Failed to get resource owner: '.$e->getMessage(),
+                    'errorMessage' => 'Failed to get resource owner: ' . $e->getMessage(),
                 ];
             }
 

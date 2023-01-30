@@ -33,14 +33,14 @@ services:
     depends_on:
       - php
     environment:
-      SERVER_NAME: ${SERVER_NAME:-localhost, caddy:80}
+      SERVER_NAME: ${SERVER_NAME:-localhost, caddy:80, keycloack-test}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
     restart: unless-stopped
     volumes:
       - php_socket:/var/run/php
-      - caddy_data:/data
-      - caddy_config:/config
+      - ~/docker/caddy_data/config:/config
+      - ~/docker/caddy_data/data:/data
     ports:
       # HTTP
       - target: 80
@@ -58,22 +58,14 @@ services:
   keycloack:
     image: quay.io/keycloak/keycloak:latest
     restart: unless-stopped
-#    volumes:
-#      - keycloack_data:/var/run/php
+    volumes:
+        - ~/docker/keycloack/data:/var/run/php
     ports:
       - 8085:8080
       - 8787:8787
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KEYCLOAK_LOGLEVEL: INFO
-      ROOT_LOGLEVEL: INFO
-      DB_VENDOR: POSTGRES
-      DB_ADDR: keycloack-postgres
-      DB_DATABASE: keycloak
-      DB_USER: keycloak
-      DB_SCHEMA: public
-      DB_PASSWORD: password
+    env_file:
+      - .env.docker.local
+    #environment:
       # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
       #JDBC_PARAMS: "ssl=true"
     command:
@@ -85,12 +77,10 @@ services:
   keycloack-postgres:
       image: postgres:latest
       volumes:
-        - keycloak_postgresql:/var/lib/postgresql
-        - keycloak_postgresql_data:/var/lib/postgresql/data
-      environment:
-        POSTGRES_DB: keycloak
-        POSTGRES_USER: keycloak
-        POSTGRES_PASSWORD: password
+        - ~/docker/keycloack-postgresql:/var/lib/postgresql
+        - ~/docker/keycloack-postgresql/data:/var/lib/postgresql/data
+      env_file:
+      - .env.docker.local
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
@@ -98,10 +88,6 @@ services:
 
 volumes:
   php_socket:
-  caddy_data:
-  caddy_config:
-  keycloak_postgresql:
-  keycloak_postgresql_data:
 
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###

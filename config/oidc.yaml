@@ -1,0 +1,7 @@
+parameters:
+  app.oidc.authServerUrl: "%env(AUTH_SERVER_URL)%"
+  app.oidc.realm: "%env(REALM)%"
+  app.oidc.clientId: "%env(CLIENT_ID)%"
+  app.oidc.clientSecret: "%env(CLIENT_SECRET)%"
+  app.oidc.redirectUri: "%env(REDIRECT_URI)%"
+  app.oidc.version: "%env(KEYCLOACK_VERSION)%"
