@@ -78,7 +78,7 @@ services:
       image: postgres:latest
       volumes:
         - ~/docker/keycloack-postgresql:/var/lib/postgresql
-        - ~/docker/keycloack-postgresql/data:/var/lib/postgresql/data
+        - ~/docker/keycloack-postgresql-data:/var/lib/postgresql/data
       env_file:
       - .env.docker.local
 

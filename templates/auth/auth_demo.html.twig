@@ -6,6 +6,11 @@ Keycloack Auth Demo Application
 
 {% block body %}
     <h1>Keycloack Auth Demo Application</h1>
-    <a href="https://localhost/auth" class="btn btn-primary btn-lg">Authorize</a>
+    <a href="https://localhost/auth" class="btn btn-primary btn-lg">Authorize</a><br>
+    <a href="https://localhost/logout" class="btn btn-warning btn-lg">Logout</a>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <p>Email: {{ app.user.email }}</p>
+    {% endif %}
 
 {% endblock %}

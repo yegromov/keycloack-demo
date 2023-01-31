@@ -14,6 +14,10 @@ class AuthController extends AbstractController
     #[Template('auth/auth_demo.html.twig')]
     public function authDemo()
     {
+        $user = $this->getUser();
+        return [
+            'user' => $user,
+        ];
     }
 
     #[Route('/auth', name: 'app_auth')]
